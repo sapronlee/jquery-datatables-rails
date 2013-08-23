@@ -2071,65 +2071,65 @@
 		 */
 		function _fnFeatureHtmlFilter ( oSettings )
 		{
-			var oPreviousSearch = oSettings.oPreviousSearch;
-
-			var sSearchStr = oSettings.oLanguage.sSearch;
-			sSearchStr = (sSearchStr.indexOf('_INPUT_') !== -1) ?
-			  sSearchStr.replace('_INPUT_', '<input type="text" />') :
-			  sSearchStr==="" ? '<input type="text" />' : sSearchStr+' <input type="text" />';
-
-			var nFilter = document.createElement( 'div' );
-			nFilter.className = oSettings.oClasses.sFilter;
-			nFilter.innerHTML = '<label>'+sSearchStr+'</label>';
-			if ( !oSettings.aanFeatures.f )
-			{
-				nFilter.id = oSettings.sTableId+'_filter';
-			}
-
-			var jqFilter = $('input[type="text"]', nFilter);
-
-			// Store a reference to the input element, so other input elements could be
-			// added to the filter wrapper if needed (submit button for example)
-			nFilter._DT_Input = jqFilter[0];
-
-			jqFilter.val( oPreviousSearch.sSearch.replace('"','&quot;') );
-			jqFilter.bind( 'keyup.DT', function(e) {
-				/* Update all other filter input elements for the new display */
-				var n = oSettings.aanFeatures.f;
-				var val = this.value==="" ? "" : this.value; // mental IE8 fix :-(
-
-				for ( var i=0, iLen=n.length ; i<iLen ; i++ )
-				{
-					if ( n[i] != $(this).parents('div.dataTables_filter')[0] )
-					{
-						$(n[i]._DT_Input).val( val );
-					}
-				}
-
-				/* Now do the filter */
-				if ( val != oPreviousSearch.sSearch )
-				{
-					_fnFilterComplete( oSettings, {
-						"sSearch": val,
-						"bRegex": oPreviousSearch.bRegex,
-						"bSmart": oPreviousSearch.bSmart ,
-						"bCaseInsensitive": oPreviousSearch.bCaseInsensitive
-					} );
-				}
-			} );
-
-			jqFilter
-				.attr('aria-controls', oSettings.sTableId)
-				.bind( 'keypress.DT', function(e) {
-					/* Prevent form submission */
-					if ( e.keyCode == 13 )
-					{
-						return false;
-					}
-				}
-			);
-
-			return nFilter;
+      // edit sapronlee start
+      var oPreviousSearch = oSettings.oPreviousSearch;
+      var sSearchStr = '<input type="text" class="input-medium" placeholder="'+oSettings.oLanguage.sSearch+'">';
+      sSearchStr += '<button class="btn"><i class="icon-search"></i></button>';
+      
+      var nFilter = document.createElement( 'div' );
+      nFilter.className = 'input-append search '+oSettings.oClasses.sFilter;
+      nFilter.innerHTML = sSearchStr;
+      
+      if ( !oSettings.aanFeatures.f )
+      {
+        nFilter.id = oSettings.sTableId+'_filter';
+      }
+      
+      var jqFilter = $('input[type="text"]', nFilter);
+      nFilter._DT_Input = jqFilter[0];
+      
+      jqFilter.val( oPreviousSearch.sSearch.replace('"','&quot;') );
+      
+      $(nFilter).on( 'searched.DT', function(e, searchText) {
+        /* Update all other filter input elements for the new display */
+        var n = oSettings.aanFeatures.f;
+          
+        for ( var i=0, iLen=n.length ; i<iLen ; i++ )
+        {
+          if ( n[i] != $(this)[0] )
+          {
+            $(n[i]._DT_Input).val( searchText );
+          }
+        }
+        
+        /* Now do the filter */
+        if ( searchText != oPreviousSearch.sSearch )
+        {
+          _fnFilterComplete( oSettings, { 
+            "sSearch": searchText, 
+            "bRegex": oPreviousSearch.bRegex,
+            "bSmart": oPreviousSearch.bSmart ,
+            "bCaseInsensitive": oPreviousSearch.bCaseInsensitive 
+          });
+        }
+      });
+      
+      $(nFilter).on( 'cleared.DT', function(e, searchText) {
+        /* Now do the filter */
+        if ( searchText != oPreviousSearch.sSearch )
+        {
+          _fnFilterComplete( oSettings, { 
+            "sSearch": searchText, 
+            "bRegex": oPreviousSearch.bRegex,
+            "bSmart": oPreviousSearch.bSmart ,
+            "bCaseInsensitive": oPreviousSearch.bCaseInsensitive 
+          });
+        }
+      });
+    
+      jqFilter.attr('aria-controls', oSettings.sTableId);
+      
+      return nFilter;
 		}
 
 
